@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  
+  postgres:
+    container_name: service_postgres
+    image: postgres:alpine3.18
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
+#    networks:
+#      mynetwork:
+#        ipv4_address: 172.20.0.4
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/data/pgdata:/var/lib/postgresql/data
+#      - ./docker/config/postgresql.conf:/etc/postgresql/postgresql.conf
+
+  mysql:
+    container_name: service_mysql
+    image: mysql:5.6.51
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+      MYSQL_DATABASE: mydb
+#    networks:
+#      mynetwork:
+#        ipv4_address: 172.20.0.8
+    ports:
+      - "3306:3306"
+    volumes:
+     - ./docker/data/mysql_data:/var/lib/mysql
+#     - ./docker/config/my.cnf:/etc/mysql/my.cnf
+
+
+networks:
+  mynetwork:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
