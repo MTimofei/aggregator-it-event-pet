@@ -33,6 +33,11 @@ type User struct {
 type NewUser struct {
 	Login string
 	Salt  []byte
-	Hash  []byte
+	Hesh  []byte
 	Roly  string
+}
+
+func NweClient(login string, hesh []byte, salt []byte) *NewUser {
+	var nUser = NewUser{Login: login, Hesh: hesh, Salt: salt, Roly: "client"}
+	return &nUser
 }

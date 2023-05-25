@@ -25,26 +25,49 @@ func New(login string, password string) (a *MyAuth) {
 	return &MyAuth{Login: login, Password: password}
 }
 
+// регистрация пользователя
 func (a *MyAuth) Reg() (err error) {
-	// проверка наличия юзера
-	result, err := a.Stor.Login(a.Login)
+	defer func() { err = e.IfErr("cen't reg", err) }()
+
+	err = a.validName()
 	if err != nil {
-		return e.Err("cen't reg", err)
-	}
-	if result != nil {
-		return e.Err("cen't reg", fmt.Errorf(errUsernameUsed))
+		return err
 	}
 
 	//получение хэша пароля и динамической соли
 	a.ECod.GenerationSalt()
-	h := a.ECod.Heah(a.Password)
+	h := a.ECod.Hesh(a.Password)
 
 	//отпровляем в стор
-	a.Stor.Add(&storage.NewUser{Login: a.Login,Hash: h.Password,Salt: h.Salt,Roly: ""})
+	err = a.Stor.Add(storage.NweClient(a.Login, h.Password, h.Salt))
+	if err != nil {
+		return err
+	}
 
-	return e.Err("cen't reg", nil)
+	return nil
 }
 
 func (a *MyAuth) Auth() (user *auth.User, err error) {
-	return
+	defer func() { err = e.IfErr("cen't auth", err) }()
+	//получение данных пользователя
+
+	//проверяем пороль
+
+	return nil, nil
+}
+
+// проверка уникальности имени, е
+// сли функия возврощает нулевую ошибку
+// то имя доступно
+func (a *MyAuth) validName() (err error) {
+	defer func() { err = e.IfErr("validName", err) }()
+	result, err := a.Stor.Login(a.Login)
+	if err != nil {
+		return err
+	}
+	if result != nil {
+		return fmt.Errorf(errUsernameUsed)
+	}
+
+	return nil
 }
