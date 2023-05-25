@@ -9,7 +9,7 @@ import (
 var host = "0.0.0.0:1000"
 
 func main() {
-	ctx, cansel := context.WithCancel(context.Background())
+	_, cansel := context.WithCancel(context.Background())
 
 	go handlerSignal(cansel)
 

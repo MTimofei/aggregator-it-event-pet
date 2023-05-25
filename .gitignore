@@ -1,4 +1,4 @@
 /app.drawio
 /doc.txt
 /.gitignore
-/cmd/research/main.go
+cmd/research/main.go
