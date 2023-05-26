@@ -39,7 +39,7 @@ func (tdb *DataBase) Add(user *storage.NewUser) (err error) {
 	if err != nil {
 		return err
 	}
-
+	bs = append(bs, byte('\n'))
 	_, err = tdb.DB.Write(bs)
 	if err != nil {
 		return err
