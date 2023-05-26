@@ -16,7 +16,7 @@ type DataBase struct {
 // подключение к тестовой бд
 // после вызова бд незабудте закрыть отложеной функцией defer tdb.DB.Close()
 func Connect() (tdb *DataBase, err error) {
-	file, err := os.Create("db")
+	file, err := os.Create("db.txt")
 	if err != nil {
 		return nil, e.Err("cen't connect test db", err)
 	}
