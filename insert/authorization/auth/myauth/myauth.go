@@ -3,7 +3,7 @@ package myauth
 import (
 	"fmt"
 	"new/insert/authorization/auth"
-	"new/insert/authorization/ecod"
+	"new/insert/authorization/ecode"
 	"new/insert/authorization/storage"
 	"new/pkg/e"
 )
@@ -15,14 +15,14 @@ const (
 )
 
 type MyAuth struct {
-	Login    string
-	Password string
-	Stor     storage.Storage
-	ECod     ecod.ECod
+	login    string
+	password string
+	stor     storage.Storage
+	eCod     ecode.ECode
 }
 
 func New(login string, password string) (a *MyAuth) {
-	return &MyAuth{Login: login, Password: password}
+	return &MyAuth{login: login, password: password}
 }
 
 // регистрация пользователя
@@ -35,11 +35,11 @@ func (a *MyAuth) Reg() (err error) {
 	}
 
 	//получение хэша пароля и динамической соли
-	a.ECod.GenerationSalt()
-	h := a.ECod.Hesh(a.Password)
+	a.eCod.GenerationSalt()
+	h := a.eCod.Hesh(a.password)
 
 	//отпровляем в стор
-	err = a.Stor.Add(storage.NweClient(a.Login, h.Password, h.Salt))
+	err = a.stor.Add(storage.NweClient(a.login, h.Password, h.Salt))
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,7 @@ func (a *MyAuth) Auth() (user *auth.User, err error) {
 // то имя доступно
 func (a *MyAuth) validName() (err error) {
 	defer func() { err = e.IfErr("validName", err) }()
-	result, err := a.Stor.Login(a.Login)
+	result, err := a.stor.Login(a.login)
 	if err != nil {
 		return err
 	}

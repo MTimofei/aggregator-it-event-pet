@@ -1,9 +1,7 @@
-package auth
+package token
 
-type Auth interface {
-	Reg() (err error)
-	Auth() (user *User, err error)
-	Ident() (err error)
+type Token interface {
+	Create(*User) (string, error)
 }
 
 type User struct {
