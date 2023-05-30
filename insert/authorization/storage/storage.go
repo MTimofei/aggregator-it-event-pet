@@ -17,7 +17,7 @@ type Storage interface {
 	Login(login string) (user *User, err error)
 
 	//получение всех юзеров
-	All() (user []User, err error)
+	All() (users []User, err error)
 }
 
 type User struct {

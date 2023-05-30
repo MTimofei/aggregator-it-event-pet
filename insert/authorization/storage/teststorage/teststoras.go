@@ -1,65 +1,61 @@
 package teststorage
 
 import (
-	"encoding/json"
 	"new/insert/authorization/storage"
-	"new/pkg/e"
-	"os"
 	"time"
 )
 
 // структура реализующая бд для тестов
 type DataBase struct {
-	DB *os.File
+	DB map[int]storage.User
 }
 
 // подключение к тестовой бд
-// после вызова бд незабудте закрыть отложеной функцией defer tdb.DB.Close()
 func Connect() (tdb *DataBase, err error) {
-	file, err := os.Create("db.txt")
-	if err != nil {
-		return nil, e.Err("cen't connect test db", err)
+	tdb = &DataBase{
+		DB: make(map[int]storage.User),
 	}
 
-	return &DataBase{DB: file}, nil
+	//данные по умолчания для дб
+	tdb.DB[1] = storage.User{
+		ID:    1,
+		Login: "test1",
+		Salt:  []byte("Test1Salt"),
+		Hash:  []byte("test1Password"),
+		Roly:  "admin",
+		RegAt: time.Date(1000, time.January, 1, 0, 0, 0, 0, time.UTC),
+	}
+
+	tdb.DB[2] = storage.User{
+		ID:    2,
+		Login: "test2",
+		Salt:  []byte("Test2Salt"),
+		Hash:  []byte("test2Password"),
+		Roly:  "client",
+		RegAt: time.Date(1000, time.January, 1, 0, 0, 0, 0, time.UTC),
+	}
+
+	return tdb, nil
 }
 
+// добавление в db
 func (tdb *DataBase) Add(user *storage.NewUser) (err error) {
-	defer func() { err = e.IfErr("cen't add test db", err) }()
-
-	bs, err := json.Marshal(storage.User{
-		ID:        2,
-		Login:     user.Login,
-		Salt:      user.Salt,
-		Hash:      user.Hesh,
-		Roly:      user.Roly,
-		RegAt:     time.Now(),
-		UpdLastAt: time.Now(),
-	})
-	if err != nil {
-		return err
-	}
-	bs = append(bs, byte('\n'))
-	_, err = tdb.DB.Write(bs)
-	if err != nil {
-		return err
-	}
 
 	return nil
 }
 
 func (tdb *DataBase) Update(user *storage.User) (err error) {
-	return
+	return nil
 }
 
 func (tdb *DataBase) Removal(user *storage.User) (err error) {
-	return
+	return nil
 }
 
 func (tdb *DataBase) Login(login string) (user *storage.User, err error) {
-	return
+	return user, nil
 }
 
-func (tdb *DataBase) All() (user []storage.User, err error) {
-	return
+func (tdb *DataBase) All() (users []storage.User, err error) {
+	return users, nil
 }
