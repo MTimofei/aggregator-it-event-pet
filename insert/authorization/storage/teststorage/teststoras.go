@@ -40,6 +40,22 @@ func Connect() (tdb *DataBase, err error) {
 
 // добавление в db
 func (tdb *DataBase) Add(user *storage.NewUser) (err error) {
+	var maxId int = 0
+	for i := range tdb.DB {
+		if maxId < i {
+			maxId = i
+		}
+	}
+
+	maxId++
+	tdb.DB[maxId] = storage.User{
+		ID:    int64(maxId),
+		Login: user.Login,
+		Salt:  user.Salt,
+		Hash:  user.Hesh,
+		Roly:  user.Roly,
+		RegAt: time.Date(1000, time.January, 1, 0, 0, 0, 0, time.UTC),
+	}
 
 	return nil
 }

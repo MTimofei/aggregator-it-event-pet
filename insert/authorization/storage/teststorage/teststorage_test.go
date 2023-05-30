@@ -43,11 +43,11 @@ func TestAdd(t *testing.T) {
 	Cases := []struct {
 		name     string
 		data     storage.NewUser
-		expected []storage.User
+		expected map[int]storage.User
 	}{
 		{"test1",
 			storage.NewUser{Login: "test3", Salt: []byte("test3salt"), Hesh: []byte("test3Password"), Roly: "client"},
-			[]storage.User{
+			map[int]storage.User{
 				1: {ID: 1,
 					Login: "test1",
 					Salt:  []byte("Test1Salt"),
@@ -72,7 +72,7 @@ func TestAdd(t *testing.T) {
 		},
 		{"test2",
 			storage.NewUser{Login: "test4", Salt: []byte("test4salt"), Hesh: []byte("test4Password"), Roly: "client"},
-			[]storage.User{
+			map[int]storage.User{
 				1: {ID: 1,
 					Login: "test1",
 					Salt:  []byte("Test1Salt"),
