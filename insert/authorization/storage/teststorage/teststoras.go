@@ -60,18 +60,26 @@ func (tdb *DataBase) Add(user *storage.NewUser) (err error) {
 	return nil
 }
 
+// изменени даных записи по ее id
 func (tdb *DataBase) Update(user *storage.User) (err error) {
+	u := tdb.DB[int(user.ID)]
+	u.Login = user.Login
+	u.Salt = user.Salt
+	u.Hash = user.Hash
+	u.Roly = user.Roly
+	tdb.DB[int(user.ID)] = u
 	return nil
 }
 
-func (tdb *DataBase) Removal(user *storage.User) (err error) {
+// удаление записи из дб по id
+func (tdb *DataBase) Removal(id int64) (err error) {
 	return nil
 }
 
-func (tdb *DataBase) Login(login string) (user *storage.User, err error) {
-	return user, nil
-}
+// func (tdb *DataBase) Login(login string) (user *storage.User, err error) {
+// 	return user, nil
+// }
 
-func (tdb *DataBase) All() (users []storage.User, err error) {
-	return users, nil
-}
+// func (tdb *DataBase) All() (users []storage.User, err error) {
+// 	return users, nil
+// }

@@ -11,7 +11,7 @@ type Storage interface {
 	Update(user *User) (err error)
 
 	//удоление юзера из бд
-	Removal(user *User) (err error)
+	Removal(id int64) (err error)
 
 	//получение данных юзера по логину
 	Login(login string) (user *User, err error)

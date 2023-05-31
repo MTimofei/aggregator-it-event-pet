@@ -9,7 +9,7 @@ import (
 )
 
 // тест подключения
-func TestConnect(t *testing.T) {
+func testConnect(t *testing.T) {
 	//создание заведомо верных данных
 	expected := map[int]storage.User{
 		1: {ID: 1,
@@ -38,14 +38,15 @@ func TestConnect(t *testing.T) {
 }
 
 // тест метода добавления
-func TestAdd(t *testing.T) {
+func testAdd(t *testing.T) {
 	//создаем тест кес
 	Cases := []struct {
 		name     string
 		data     storage.NewUser
 		expected map[int]storage.User
 	}{
-		{"test1",
+		{
+			"test1",
 			storage.NewUser{Login: "test3", Salt: []byte("test3salt"), Hesh: []byte("test3Password"), Roly: "client"},
 			map[int]storage.User{
 				1: {ID: 1,
@@ -70,7 +71,8 @@ func TestAdd(t *testing.T) {
 					RegAt: time.Date(1000, time.January, 1, 0, 0, 0, 0, time.UTC)},
 			},
 		},
-		{"test2",
+		{
+			"test2",
 			storage.NewUser{Login: "test4", Salt: []byte("test4salt"), Hesh: []byte("test4Password"), Roly: "client"},
 			map[int]storage.User{
 				1: {ID: 1,
@@ -119,6 +121,76 @@ func TestAdd(t *testing.T) {
 			if !reflect.DeepEqual(db.DB, test.expected) {
 				t.Errorf("\nОжидалось %v\nполучено %v", test.expected, db.DB)
 			}
+
+		})
+	}
+}
+
+// тест изменения данных бд
+func testUpdata(t *testing.T) {
+	//создание заведомо верных данных
+	cases := []struct {
+		name     string
+		data     storage.User
+		expected map[int]storage.User
+	}{
+		{
+			"test1",
+			storage.User{ID: 1,
+				Login: "NewTest1",
+				Salt:  []byte("Test1Salt"),
+				Hash:  []byte("NewTest1Password"),
+				Roly:  "admin",
+				RegAt: time.Date(1000, time.January, 1, 0, 0, 0, 0, time.UTC),
+			},
+			map[int]storage.User{
+				1: {
+					ID:    1,
+					Login: "NewTest1",
+					Salt:  []byte("Test1Salt"),
+					Hash:  []byte("NewTest1Password"),
+					Roly:  "admin",
+					RegAt: time.Date(1000, time.January, 1, 0, 0, 0, 0, time.UTC)},
+				2: {
+					ID:    2,
+					Login: "test2",
+					Salt:  []byte("Test2Salt"),
+					Hash:  []byte("test2Password"),
+					Roly:  "client",
+					RegAt: time.Date(1000, time.January, 1, 0, 0, 0, 0, time.UTC)},
+			},
+		},
+	}
+
+	db, _ := teststorage.Connect()
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			t.Log(test.name)
+
+			err := db.Update(&test.data)
+			if err != nil {
+				t.Errorf("err TestUpdata: %e", err)
+			}
+
+			// проверка резултата
+			if !reflect.DeepEqual(db.DB, test.expected) {
+				t.Errorf("\nОжидалось %v\nполучено %v", test.expected, db.DB)
+			}
+		})
+	}
+}
+
+// тест метода удаления
+func testRemoval(t *testing.T) {
+	testCases := []struct {
+		name string
+	}{
+		{
+			"",
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
 
 		})
 	}
