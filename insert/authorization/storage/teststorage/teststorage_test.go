@@ -1,6 +1,7 @@
 package teststorage_test
 
 import (
+	"errors"
 	"new/insert/authorization/storage"
 	"new/insert/authorization/storage/teststorage"
 	"reflect"
@@ -9,9 +10,9 @@ import (
 )
 
 // тест подключения
-func testConnect(t *testing.T) {
+func TestConnect(t *testing.T) {
 	//создание заведомо верных данных
-	expected := map[int]storage.User{
+	expected := map[int64]storage.User{
 		1: {ID: 1,
 			Login: "test1",
 			Salt:  []byte("Test1Salt"),
@@ -38,17 +39,17 @@ func testConnect(t *testing.T) {
 }
 
 // тест метода добавления
-func testAdd(t *testing.T) {
+func TestAdd(t *testing.T) {
 	//создаем тест кес
-	Cases := []struct {
+	testCases := []struct {
 		name     string
 		data     storage.NewUser
-		expected map[int]storage.User
+		expected map[int64]storage.User
 	}{
 		{
 			"test1",
 			storage.NewUser{Login: "test3", Salt: []byte("test3salt"), Hesh: []byte("test3Password"), Roly: "client"},
-			map[int]storage.User{
+			map[int64]storage.User{
 				1: {ID: 1,
 					Login: "test1",
 					Salt:  []byte("Test1Salt"),
@@ -74,7 +75,7 @@ func testAdd(t *testing.T) {
 		{
 			"test2",
 			storage.NewUser{Login: "test4", Salt: []byte("test4salt"), Hesh: []byte("test4Password"), Roly: "client"},
-			map[int]storage.User{
+			map[int64]storage.User{
 				1: {ID: 1,
 					Login: "test1",
 					Salt:  []byte("Test1Salt"),
@@ -108,7 +109,7 @@ func testAdd(t *testing.T) {
 
 	db, _ := teststorage.Connect()
 
-	for _, test := range Cases {
+	for _, test := range testCases {
 
 		t.Run(test.name, func(t *testing.T) {
 			//вызов функции
@@ -127,12 +128,13 @@ func testAdd(t *testing.T) {
 }
 
 // тест изменения данных бд
-func testUpdata(t *testing.T) {
+func TestUpdata(t *testing.T) {
 	//создание заведомо верных данных
-	cases := []struct {
-		name     string
-		data     storage.User
-		expected map[int]storage.User
+	testCases := []struct {
+		name        string
+		data        storage.User
+		expected    map[int64]storage.User
+		errExpected error
 	}{
 		{
 			"test1",
@@ -143,7 +145,7 @@ func testUpdata(t *testing.T) {
 				Roly:  "admin",
 				RegAt: time.Date(1000, time.January, 1, 0, 0, 0, 0, time.UTC),
 			},
-			map[int]storage.User{
+			map[int64]storage.User{
 				1: {
 					ID:    1,
 					Login: "NewTest1",
@@ -159,21 +161,43 @@ func testUpdata(t *testing.T) {
 					Roly:  "client",
 					RegAt: time.Date(1000, time.January, 1, 0, 0, 0, 0, time.UTC)},
 			},
+			nil,
+		},
+		{
+			"test2",
+			storage.User{ID: 3,
+				Login: "test3",
+				Salt:  []byte(""),
+				Hash:  []byte(""),
+				Roly:  "client",
+				RegAt: time.Date(1000, time.January, 1, 0, 0, 0, 0, time.UTC),
+			},
+			map[int64]storage.User{
+				1: {
+					ID:    1,
+					Login: "NewTest1",
+					Salt:  []byte("Test1Salt"),
+					Hash:  []byte("NewTest1Password"),
+					Roly:  "admin",
+					RegAt: time.Date(1000, time.January, 1, 0, 0, 0, 0, time.UTC)},
+				2: {
+					ID:    2,
+					Login: "test2",
+					Salt:  []byte("Test2Salt"),
+					Hash:  []byte("test2Password"),
+					Roly:  "client",
+					RegAt: time.Date(1000, time.January, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			errors.New("there is no record this id"),
 		},
 	}
 
 	db, _ := teststorage.Connect()
-	for _, test := range cases {
+	for _, test := range testCases {
 		t.Run(test.name, func(t *testing.T) {
-			t.Log(test.name)
-
 			err := db.Update(&test.data)
-			if err != nil {
-				t.Errorf("err TestUpdata: %e", err)
-			}
-
 			// проверка резултата
-			if !reflect.DeepEqual(db.DB, test.expected) {
+			if !reflect.DeepEqual(db.DB, test.expected) && err == test.errExpected {
 				t.Errorf("\nОжидалось %v\nполучено %v", test.expected, db.DB)
 			}
 		})
@@ -181,17 +205,65 @@ func testUpdata(t *testing.T) {
 }
 
 // тест метода удаления
-func testRemoval(t *testing.T) {
+func TestRemoval(t *testing.T) {
 	testCases := []struct {
-		name string
+		name        string
+		id          int64
+		expected    map[int64]storage.User
+		errExpected error
 	}{
 		{
-			"",
+			"test1",
+			1,
+			map[int64]storage.User{
+				2: {
+					ID:    2,
+					Login: "test2",
+					Salt:  []byte("Test2Salt"),
+					Hash:  []byte("test2Password"),
+					Roly:  "client",
+					RegAt: time.Date(1000, time.January, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			nil,
 		},
+		{
+			"test2",
+			2,
+			map[int64]storage.User{},
+			nil,
+		},
+	}
+	db, err := teststorage.Connect()
+	if err != nil {
+		t.Errorf("err testRemoval: %e", err)
 	}
 	for _, tC := range testCases {
 		t.Run(tC.name, func(t *testing.T) {
+			err := db.Removal(tC.id)
+			if !reflect.DeepEqual(db.DB, tC.expected) && err != tC.errExpected {
+				t.Errorf("\nОжидалось: %v\nполучено: %v\nerr: %e", tC.expected, db.DB, err)
+			}
+		})
+	}
+}
 
+// тест поискак данных по логину
+func TestLogin(t *testing.T) {
+	testCases := []struct {
+		name        string
+		id          int64
+		expected    map[int64]storage.User
+		errExpected error
+	}{}
+
+	db, err := teststorage.Connect()
+
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+
+			if !reflect.DeepEqual(db.DB, tC.expected) && err != tC.errExpected {
+				t.Errorf("\nОжидалось: %v\nполучено: %v\nerr: %e", tC.expected, db.DB, err)
+			}
 		})
 	}
 }

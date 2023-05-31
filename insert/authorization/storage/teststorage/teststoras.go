@@ -2,18 +2,24 @@ package teststorage
 
 import (
 	"new/insert/authorization/storage"
+	"new/pkg/e"
+	"reflect"
 	"time"
+)
+
+const (
+	errUpdata = "there is no record this id"
 )
 
 // структура реализующая бд для тестов
 type DataBase struct {
-	DB map[int]storage.User
+	DB map[int64]storage.User
 }
 
 // подключение к тестовой бд
 func Connect() (tdb *DataBase, err error) {
 	tdb = &DataBase{
-		DB: make(map[int]storage.User),
+		DB: make(map[int64]storage.User),
 	}
 
 	//данные по умолчания для дб
@@ -40,7 +46,7 @@ func Connect() (tdb *DataBase, err error) {
 
 // добавление в db
 func (tdb *DataBase) Add(user *storage.NewUser) (err error) {
-	var maxId int = 0
+	var maxId int64 = 0
 	for i := range tdb.DB {
 		if maxId < i {
 			maxId = i
@@ -62,17 +68,25 @@ func (tdb *DataBase) Add(user *storage.NewUser) (err error) {
 
 // изменени даных записи по ее id
 func (tdb *DataBase) Update(user *storage.User) (err error) {
-	u := tdb.DB[int(user.ID)]
+	var c storage.User
+
+	u := tdb.DB[user.ID]
+
+	if reflect.DeepEqual(u, c) {
+		return e.Err(errUpdata, nil)
+	}
 	u.Login = user.Login
 	u.Salt = user.Salt
 	u.Hash = user.Hash
 	u.Roly = user.Roly
-	tdb.DB[int(user.ID)] = u
+	tdb.DB[user.ID] = u
+
 	return nil
 }
 
 // удаление записи из дб по id
 func (tdb *DataBase) Removal(id int64) (err error) {
+	delete(tdb.DB, id)
 	return nil
 }
 
@@ -80,6 +94,6 @@ func (tdb *DataBase) Removal(id int64) (err error) {
 // 	return user, nil
 // }
 
-// func (tdb *DataBase) All() (users []storage.User, err error) {
-// 	return users, nil
-// }
+func (tdb *DataBase) All() (users []storage.User, err error) {
+	return users, nil
+}
