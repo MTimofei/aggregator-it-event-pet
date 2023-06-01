@@ -9,6 +9,7 @@ import (
 
 const (
 	errUpdata = "there is no record this id"
+	errLogin  = "record not faund"
 )
 
 // структура реализующая бд для тестов
@@ -90,10 +91,21 @@ func (tdb *DataBase) Removal(id int64) (err error) {
 	return nil
 }
 
-// func (tdb *DataBase) Login(login string) (user *storage.User, err error) {
-// 	return user, nil
-// }
+// поиск записи по логину
+func (tdb *DataBase) Login(login string) (user *storage.User, err error) {
+	for i := range tdb.DB {
+		if tdb.DB[i].Login == login {
+			u := tdb.DB[i]
+			return &u, nil
+		}
+	}
+	return &storage.User{}, e.Err(errLogin, nil)
+}
 
+// полученние всех записей из бд
 func (tdb *DataBase) All() (users []storage.User, err error) {
+	for _, u := range tdb.DB {
+		users = append(users, u)
+	}
 	return users, nil
 }

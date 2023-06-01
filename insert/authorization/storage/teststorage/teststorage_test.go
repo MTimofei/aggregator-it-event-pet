@@ -9,6 +9,9 @@ import (
 	"time"
 )
 
+// проверка реализует ли тестовое бд интерфейс storage
+var _ storage.Storage = (*teststorage.DataBase)(nil)
+
 // тест подключения
 func TestConnect(t *testing.T) {
 	//создание заведомо верных данных
@@ -251,18 +254,98 @@ func TestRemoval(t *testing.T) {
 func TestLogin(t *testing.T) {
 	testCases := []struct {
 		name        string
-		id          int64
-		expected    map[int64]storage.User
+		login       string
+		expected    storage.User
 		errExpected error
-	}{}
+	}{
+		{
+			"test1",
+			"test1",
+			storage.User{
+				ID:    1,
+				Login: "test1",
+				Salt:  []byte("Test1Salt"),
+				Hash:  []byte("test1Password"),
+				Roly:  "admin",
+				RegAt: time.Date(1000, time.January, 1, 0, 0, 0, 0, time.UTC),
+			},
+			nil,
+		},
+		{
+			"test2",
+			"test2",
+			storage.User{
+				ID:    2,
+				Login: "test2",
+				Salt:  []byte("Test2Salt"),
+				Hash:  []byte("test2Password"),
+				Roly:  "client",
+				RegAt: time.Date(1000, time.January, 1, 0, 0, 0, 0, time.UTC),
+			},
+			nil,
+		},
+		{
+			"test3",
+			"test3",
+			storage.User{},
+			errors.New("record not faund"),
+		},
+	}
 
 	db, err := teststorage.Connect()
+	if err != nil {
+		t.Errorf("err testRemoval: %e", err)
+	}
 
 	for _, tC := range testCases {
 		t.Run(tC.name, func(t *testing.T) {
+			result, err := db.Login(tC.login)
+			if !reflect.DeepEqual(*result, tC.expected) && err != tC.errExpected {
+				t.Errorf("\nОжидалось: %v\nполучено: %v\nerr: %e", tC.expected, *result, err)
+			}
+		})
+	}
+}
 
-			if !reflect.DeepEqual(db.DB, tC.expected) && err != tC.errExpected {
-				t.Errorf("\nОжидалось: %v\nполучено: %v\nerr: %e", tC.expected, db.DB, err)
+func TestAll(t *testing.T) {
+	testCases := []struct {
+		name        string
+		expected    []storage.User
+		errExpected error
+	}{
+		{
+			"test1",
+			[]storage.User{
+				{
+					ID:    1,
+					Login: "test1",
+					Salt:  []byte("Test1Salt"),
+					Hash:  []byte("test1Password"),
+					Roly:  "admin",
+					RegAt: time.Date(1000, time.January, 1, 0, 0, 0, 0, time.UTC)},
+				{
+					ID:    2,
+					Login: "test2",
+					Salt:  []byte("Test2Salt"),
+					Hash:  []byte("test2Password"),
+					Roly:  "client",
+					RegAt: time.Date(1000, time.January, 1, 0, 0, 0, 0, time.UTC),
+				}},
+			nil,
+		},
+	}
+
+	db, err := teststorage.Connect()
+	if err != nil {
+		t.Errorf("err testRemoval: %e", err)
+
+	}
+
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			result, err := db.All()
+			if !reflect.DeepEqual(result, tC.expected) && err != tC.errExpected {
+				t.Errorf("\nОжидалось: %v\nполучено: %v\nerr: %e", tC.expected, result, err)
 			}
 		})
 	}
