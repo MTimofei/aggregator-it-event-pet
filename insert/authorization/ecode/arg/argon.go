@@ -9,23 +9,23 @@ import (
 )
 
 // структура реализует интерфейс ECode
-type hash struct {
+type Hash struct {
 	staticSalt  []byte
 	dynamicSalt []byte
 }
 
 // создает структуру для новаого пользователя(регистрации)
-func New() *hash {
-	return &hash{staticSalt: []byte(config.StaticSalt), dynamicSalt: gen.Rand8bytes()}
+func New() *Hash {
+	return &Hash{staticSalt: []byte(config.StaticSalt), dynamicSalt: gen.Rand8bytes()}
 }
 
-// создает структуру для существуещего пользователя(используется для идентификации)
-func Create(salt []byte) *hash {
-	return &hash{staticSalt: []byte(config.StaticSalt), dynamicSalt: salt}
+// создает структуру c salt (используется для идентификации)
+func Create(salt []byte) *Hash {
+	return &Hash{staticSalt: []byte(config.StaticSalt), dynamicSalt: salt}
 }
 
 // извекает хэшь пользователя с использованием argon2
-func (object *hash) Hesh(password string) (h *ecode.Hash) {
+func (object *Hash) Hesh(password string) (h *ecode.Hash) {
 	saticPass := argon2.IDKey([]byte(password), object.staticSalt, 4, 16*1024, 4, 128)
 	pass := argon2.IDKey(saticPass, object.dynamicSalt, 4, 16*1024, 4, 128)
 

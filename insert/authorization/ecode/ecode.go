@@ -3,7 +3,7 @@ package ecode
 // интерфэйс для хэширования пароля
 type ECode interface {
 
-	//возврощает структуру с хеш
+	//возврощает структуру c хешем пороля и соли
 	Hesh(password string) (h *Hash)
 }
 
