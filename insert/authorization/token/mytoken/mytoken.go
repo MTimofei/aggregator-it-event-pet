@@ -7,7 +7,7 @@ import (
 	"new/insert/authorization/config"
 	"new/insert/authorization/token"
 	"new/pkg/e"
-	"new/pkg/int"
+	"new/pkg/help"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -27,7 +27,7 @@ func New() (k *Key, err error) {
 }
 
 func (k *Key) Create(u *token.User) (token string, err error) {
-	int.Up(&config.KeyId, 1)
+	help.Up(&config.KeyId, 1)
 
 	jwttoken := jwt.New(jwt.SigningMethodES256)
 

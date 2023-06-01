@@ -1,9 +1,7 @@
 package ecode
 
+// интерфэйс для хэширования пароля
 type ECode interface {
-
-	//генерирует соль
-	GenerationSalt() //(salt []byte)
 
 	//возврощает структуру с хеш
 	Hesh(password string) (h *Hash)
@@ -16,4 +14,8 @@ type Hash struct {
 
 	//хэш динамической соли
 	Salt []byte
+}
+
+func New(password, salt []byte) *Hash {
+	return &Hash{Password: password, Salt: salt}
 }
