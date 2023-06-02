@@ -67,15 +67,31 @@ func TestCreate(t *testing.T) {
 
 func TestHash(t *testing.T) {
 	testCases := []struct {
-		nameTest    string
-		password    string
-		expected    *ecode.Hash
+		nameTest string
+		password string
+		salt     []byte
+
 		errExpected error
-	}{}
+	}{
+		{
+			"test1",
+			"password1",
+			[]byte("saltTest"),
+			nil,
+		},
+	}
 
 	for _, tC := range testCases {
 		t.Run(tC.nameTest, func(t *testing.T) {
-
+			e, err := arg.Create(tC.salt)
+			if err != nil {
+				t.Error(err)
+			}
+			result1 := e.Hesh(tC.password)
+			result2 := e.Hesh(tC.password)
+			if !reflect.DeepEqual(result1, result2) {
+				t.Errorf("\nout1:\n%v\nout1:\n%v\n", result1, result2)
+			}
 		})
 	}
 }

@@ -2,6 +2,7 @@
 
 package help
 
+// принемае (n) сылку на int и значение (add) на сколько нужно увеличеть n
 func Up(n *int, add int) {
 	*n += add
 }
