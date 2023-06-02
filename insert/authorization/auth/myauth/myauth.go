@@ -35,7 +35,6 @@ func (a *MyAuth) Reg() (err error) {
 	}
 
 	//получение хэша пароля и динамической соли
-	a.eCod.GenerationSalt()
 	h := a.eCod.Hesh(a.password)
 
 	//отпровляем в стор
