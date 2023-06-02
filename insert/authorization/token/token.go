@@ -1,7 +1,12 @@
 package token
 
 type Token interface {
-	Create(*User) (string, error)
+
+	//создает токен
+	Create(u *User) (token string, err error)
+
+	// проверяет токен и возврощает структуру c данными юзра
+	Verifation(token string) (u *User, err error)
 }
 
 type User struct {
