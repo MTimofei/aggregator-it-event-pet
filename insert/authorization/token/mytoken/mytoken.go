@@ -1,15 +1,17 @@
 package mytoken
 
 import (
-	"bytes"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
-	"fmt"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/json"
 	"new/insert/authorization/config"
 	"new/insert/authorization/token"
 	"new/pkg/e"
 	"new/pkg/help"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -32,18 +34,16 @@ func (k *Key) Create(u *token.User) (token string, err error) {
 	defer func() { err = e.IfErr("can't create signed", err) }()
 	help.Up(&config.KeyId, 1)
 
-	b := bytes.NewBuffer([]byte{})
-	_, err = fmt.Fscan(b, k.key.PublicKey)
+	jwttoken := jwt.New(jwt.SigningMethodES256)
+
+	key, err := x509.MarshalECPrivateKey(k.key)
 	if err != nil {
 		return "", err
 	}
 
-	jwttoken := jwt.New(jwt.SigningMethodES256)
-
 	jwttoken.Header["name"] = "acc"
 	jwttoken.Header["jti"] = config.KeyId
-	jwttoken.Header["key"] = b.Bytes()
-
+	jwttoken.Header["key"] = key
 	jwttoken.Claims = jwt.MapClaims{
 		"id":   u.Id,
 		"name": u.Login,
@@ -54,40 +54,42 @@ func (k *Key) Create(u *token.User) (token string, err error) {
 	if err != nil {
 		return "", err
 	}
-
+	//fmt.Println(jwttoken.Method.Alg())
 	return token, nil
 }
 
 func (k *Key) Verifation(token string) (u *token.User, err error) {
 	defer func() { err = e.IfErr("cen't verifation token", err) }()
 
-	// //head := make(map[string]interface{}, 3)
+	var key *ecdsa.PrivateKey
 
-	// head := struct {
-	// 	Name string `json:"name"`
-	// 	Id   int    `json:"jti"`
-	// 	Key  []byte `json:"key"`
-	// }{}
-	// header, err := base64.RawURLEncoding.DecodeString(strings.Split(token, ".")[0])
-	// if err != nil {
-	// 	return nil, err
-	// }
+	head := struct {
+		Name string `json:"name"`
+		Id   int    `json:"jti"`
+		Key  []byte `json:"key"`
+	}{}
 
-	// err = json.Unmarshal(header, &head)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	header, err := base64.RawURLEncoding.DecodeString(strings.Split(token, ".")[0])
+	if err != nil {
+		return nil, err
+	}
 
-	// //k.key.PublicKey
-	// //fmt.Println(k.key.PublicKey)
-	// fmt.Println(head.Key)
-	// t, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-	// 	return &head.Key, nil
-	// })
-	// if err != nil {
-	// 	return nil, err
-	// }
+	err = json.Unmarshal(header, &head)
+	if err != nil {
+		return nil, err
+	}
 
-	// fmt.Println(t)
+	key, err = x509.ParseECPrivateKey(head.Key)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		return &key.PublicKey, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return u, nil
 }
