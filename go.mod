@@ -9,4 +9,8 @@ require (
 	golang.org/x/crypto v0.9.0
 )
 
-require golang.org/x/sys v0.8.0 // indirect
+require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
+	golang.org/x/sys v0.8.0 // indirect
+)
